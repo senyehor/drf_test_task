@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from people_and_groups.api.exceptions import EmailIsReadOnly
 from people_and_groups.models import Group, Person
 from utils.drf.read_only_model_serializer import ReadOnlyModelSerializer
 
@@ -22,7 +23,11 @@ class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Person
         fields = '__all__'
-        read_only_fields = ('email',)
+
+    def update(self, instance: Person, validated_data: dict):
+        if 'email' in validated_data:
+            raise EmailIsReadOnly
+        return super().update(instance, validated_data)
 
 
 class GroupSerializer(serializers.ModelSerializer):
