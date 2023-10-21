@@ -8,3 +8,9 @@ class PersonViewSet(ModelViewSetWithSeparateCreateUrl):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAdminElseReadOnly]
+
+
+class GroupViewSet(ModelViewSetWithSeparateCreateUrl):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [IsAdminElseReadOnly]
