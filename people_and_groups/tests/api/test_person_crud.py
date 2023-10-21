@@ -2,20 +2,17 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient
 
 from people_and_groups.models import Person
 from people_and_groups.tests.factories import GroupFactory, PersonFactory
-from utils.tests.factories import UserFactory
+from utils.tests.drf.utils import create_admin_client
 from utils.tests.utils import \
     ensure_expected_model_objects_ids_match_serialized_objects_ids_and_count
 
 
 class TestPersonCrud(TestCase):
     def setUp(self):
-        admin = UserFactory(is_staff=True)
-        self.__admin_client = APIClient()
-        self.__admin_client.force_authenticate(admin)
+        self.__admin_client = create_admin_client()
 
     def test_create_person(self):
         person = PersonFactory.build()
