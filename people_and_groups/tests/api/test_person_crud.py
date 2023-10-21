@@ -22,7 +22,7 @@ class TestPersonCrud(TestCase):
             'email':   person.email
         }
         response = self.__admin_client.post(
-            reverse('person-list'),
+            reverse('person-create'),
             data=correct_person_data
         )
         self.assertEquals(

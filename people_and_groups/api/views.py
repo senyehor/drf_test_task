@@ -1,11 +1,10 @@
-from rest_framework.viewsets import ModelViewSet
-
 from people_and_groups.api.permissions import IsAdminElseReadOnly
-from people_and_groups.api.serializers import PersonSerializer
-from people_and_groups.models import Person
+from people_and_groups.api.serializers import GroupSerializer, PersonSerializer
+from people_and_groups.models import Group, Person
+from utils.drf.views import ModelViewSetWithSeparateCreateUrl
 
 
-class PersonViewSet(ModelViewSet):
+class PersonViewSet(ModelViewSetWithSeparateCreateUrl):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
     permission_classes = [IsAdminElseReadOnly]
