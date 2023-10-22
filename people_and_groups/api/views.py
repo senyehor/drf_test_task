@@ -6,7 +6,7 @@ from rest_framework.viewsets import GenericViewSet
 from people_and_groups.api.permissions import IsAdminElseReadOnly
 from people_and_groups.api.serializers import (
     GroupNoMembersReadonlySerializer, GroupSerializer,
-    PersonSerializer,
+    PersonNoGroupsReadonlySerializer, PersonSerializer,
 )
 from people_and_groups.logic.simple import (
     add_person_to_group_with_membership_check, remove_person_from_group_with_membership_check,
@@ -66,3 +66,40 @@ class GroupViewSet(ModelViewSetWithSeparateCreateUrl):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [IsAdminElseReadOnly]
+
+
+class GroupMembersActionSViewSet(GenericViewSet):
+    queryset = Group.objects.all()
+    permission_classes = [IsAdminElseReadOnly]
+
+    @action(methods=('GET',), detail=True, url_path='members', url_name='members')
+    def get_group_members(self, *args, **kwargs):
+        group = self.get_object()
+        members_serialized = PersonNoGroupsReadonlySerializer(
+            group.members.all(),
+            many=True
+        ).data
+        return Response(status=status.HTTP_200_OK, data={'members': members_serialized})
+
+    @action(methods=('POST',), detail=True, url_path='add-member', url_name='add-member')
+    def add_person_to_group(self, *args, **kwargs):
+        group, person = self.__get_group_and_person()
+        add_person_to_group_with_membership_check(person, group)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=('POST',), detail=True, url_path='remove-member', url_name='remove-member')
+    def remove_person_from_group(self, *args, **kwargs):
+        group, person = self.__get_group_and_person()
+        remove_person_from_group_with_membership_check(person, group)
+        return Response(status=status.HTTP_200_OK)
+
+    def __get_group_and_person(self) -> tuple[Group, Person]:
+        group = self.get_object()
+        person_id = get_data_from_dict_with_verbose_api_exception(
+            self.request.data, 'person_id'
+        )
+        person = get_object_or_404_with_api_exception(
+            Person,
+            id=person_id
+        )
+        return group, person
